@@ -11484,7 +11484,29 @@ c_parser_generic_selection (c_parser *parser)
 	c_inhibit_evaluation_warnings++;
       in_generic++;
 
-      assoc.expression = c_parser_expr_no_commas (parser, NULL);
+      token = c_parser_peek_token (parser);
+      if (token->type == CPP_OPEN_SQUARE)
+	{
+	  c_parser_consume_token (parser);
+	  if (match)
+	    {
+	      assoc.expression = c_parser_expression (parser);
+	    }
+	  else
+	    {
+	      c_parser_balanced_token_sequence (parser);
+	      assoc.expression.value = void_node;
+	    }
+	  if (!c_parser_require (parser, CPP_CLOSE_SQUARE, "expected %<]%>"))
+	    {
+	      c_parser_skip_until_found (parser, CPP_CLOSE_PAREN, NULL);
+	      return error_expr;
+	    }
+	}
+      else
+	{
+	  assoc.expression = c_parser_expr_no_commas (parser, NULL);
+	}
 
       if (!match)
 	  c_inhibit_evaluation_warnings--;
