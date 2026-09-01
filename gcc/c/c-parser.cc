@@ -11488,7 +11488,7 @@ c_parser_generic_selection (c_parser *parser)
       if (token->type == CPP_OPEN_SQUARE)
 	{
 	  c_parser_consume_token (parser);
-	  if (match)
+	  if (match && (assoc.type != NULL_TREE || match_found < 0))
 	    {
 	      assoc.expression = c_parser_expression (parser);
 	    }
@@ -11499,6 +11499,12 @@ c_parser_generic_selection (c_parser *parser)
 	    }
 	  if (!c_parser_require (parser, CPP_CLOSE_SQUARE, "expected %<]%>"))
 	    {
+	      c_parser_skip_until_found (parser, CPP_CLOSE_PAREN, NULL);
+	      return error_expr;
+	    }
+	  if (assoc.type == NULL_TREE && c_parser_peek_token(parser)->type != CPP_CLOSE_PAREN)
+	    {
+	      c_parser_error(parser, "default _Generic association using ignore blocks must be the last association");
 	      c_parser_skip_until_found (parser, CPP_CLOSE_PAREN, NULL);
 	      return error_expr;
 	    }
